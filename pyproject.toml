@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyxecm"
-version = "0.0.0"
+version = "0.1.0"
 authors = [
   { name = "Kai Gatzweiler", email = "kgatzweiler@opentext.com" },
   { name = "Dr. Marc Diefenbruch", email = "mdiefenb@opentext.com" },
