@@ -706,7 +706,7 @@ class OTDS:
             dict: Request response or None if the REST call fails.
         """
 
-        request_url = "{}/{}".format(self.config()["partitionUrl"], name)
+        request_url = "{}/{}".format(self.partition_url(), name)
 
         logger.debug("Get user partition -> '%s'; calling -> %s", name, request_url)
 
@@ -2184,7 +2184,35 @@ class OTDS:
                 return None
         
     # end of method definition
-    
+
+    def get_partitions(self) -> dict | None:
+        request_url = self.synchronized_partition_url()
+        logger.debug(
+            "get partitions; calling -> %s",
+            request_url,
+        )
+        retries = 0
+        while True:
+            response = requests.get(
+                url=request_url,
+                headers=REQUEST_HEADERS,
+                cookies=self.cookie(),
+            )
+            if response.ok:
+                return self.parse_request_response(response)
+            # Check if Session has expired - then re-authenticate and try once more
+            elif response.status_code == 401 and retries == 0:
+                logger.debug("Session has expired - try to re-authenticate...")
+                self.authenticate(revalidate=True)
+                retries += 1
+            else:
+                logger.error(
+                    "Failed to get partitions -> %s; error -> %s (%s)",
+                    response.text,
+                    response.status_code,
+                )
+                return None
+
     def add_synchronized_partition(self, name: str, description: str, data: str) -> dict:
         """Add a new synchronized partition to OTDS
 
